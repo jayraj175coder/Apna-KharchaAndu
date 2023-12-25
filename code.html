@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=<device-width>, initial-scale=1.0">
+    <title>Kharha App</title>
+    <Style>
+        body{
+            display:flex;
+            align-items: center;
+            justify-content:center;
+            min-width:100%;
+           background-color: rgb(224, 224, 212);
+           font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+        
+        h2{
+           
+            border-bottom: 1px solid black;
+        }
+    h1{
+        text-align:center;
+        margin:50px 0 60px;
+        font-family: Verdana, Geneva, Tahoma, sans-serif;
+        color:blue;
+        border-radius: 20px;
+        box-shadow: 0px 2px -2px rgb(34,0,0);
+        border-bottom:1px solid gold;
+    }
+    .income-expense{
+        background-color: white;
+        border:1px solid rgb(64, 35, 35);
+        display:flex;
+        flex-direction:row;
+        justify-content:space-evenly;
+        box-shadow:1px 0 -23px rgb(66, 61, 61);
+        font-size:23px;
+
+    }
+    .expense{
+   color:red;
+    }
+    .income{
+       color:green;
+        border-right:0.34px solid rgb(238, 228, 228);
+
+
+    }
+
+    .history{
+        border:none;
+        border-radius:20px;
+        box-shadow: 1px 0px 4px rgb(34,0,0);
+        display: flex;
+        align-items:center;
+        flex-direction:column;
+        
+        margin:5px;
+     
+       font-size:20px;
+    
+    }
+    .deletebtn{
+        position:relative;
+        display: block;
+        top:50%;
+        left:0;
+        transform:translate(-100px,0px);
+        opacity:0;
+        transition:opacity 1s ease-in;
+        background-color:red;
+        color:white;
+       
+    }
+    .deletebtn:hover{
+         opacity:1;
+    }
+    .form{
+        margin-top:33px;
+        display:flex;
+        flex-direction:column;
+        margin-left:40px;
+       
+    }
+    label{
+        font-size: 15px;
+       
+    }
+    input{
+        width:200px;
+        font-size: 18px;
+
+    }
+  .txt{
+   margin-right:20px;
+    font-size: 20px;
+    width: 225px;
+  }
+  .number{
+    margin-right:20px;
+    font-size: 20px;
+    width: 225px;
+
+    margin-top:5px;
+  }
+  .transaction{
+    font-size: 17px;
+    color:white;
+    border:none;
+    border-radius:20px;
+    background-color:rgb(106, 47, 255);
+    width: 235px;
+    height:25px;
+    margin-top:6px;
+    margin-bottom:3px;
+  }
+    </Style>
+</head>
+<body>
+    <div class="container">
+        <h1>Apna Kharcha</h1>
+       <h2>Your Balance</h3>
+       <h3 id="balance">$30000.0</h3>
+       <div class="income-expense">
+        <div class="income"  >
+            <h4>Income</h4>
+            <p id="money_plus"> $0.0</p>
+        </div>
+        <div class="expense" >
+            <h4>expense</h4>
+            <p id=money_minus>$0.0</p>
+        </div>
+       </div>
+       <h2>ADD new Transaction</h2>
+       <form class="form" id="form">
+
+           <label for="Name">Type</label>
+           <input type="txt" placeholder="Enter your name" class="txt" id="text"> 
+           <label for="Amount">Amount</label>
+           <input type="number" placeholder="Enter your amount" class="number" id="amount">
+           <button type="submit" class="transaction">Add Transaction</button>
+        </form>
+       <h2>History</h2>
+       <div class="history" id="list">
+-
+        <span class="deletebtn">
+        <button class="deletebtn" >x</button>
+        </span>
+       </div>
+       
+    </div>
+   
+
+    <script>
+       
+      
+            // JavaScript code for functionality
+
+            const form = document.getElementById('form');
+            const textInput = document.getElementById('text');
+            const amountInput = document.getElementById('amount');
+            const list = document.getElementById('list');
+            const moneyPlus = document.getElementById('money_plus');
+            const moneyMinus = document.getElementById('money_minus');
+            const balance = document.getElementById('balance');
+
+            form.addEventListener('submit', addTransaction);
+
+            function addTransaction(event) {
+                event.preventDefault();
+
+                const text = textInput.value.trim();
+                const amount = parseFloat(amountInput.value.trim());
+
+                if (text === '' || isNaN(amount)) {
+                    alert('Please enter valid values for type and amount.');
+                    return;
+                }
+
+                const transaction = document.createElement('div');
+                transaction.classList.add('history');
+                transaction.innerHTML = `
+                    <span>${text}</span>
+                    <span>$${amount.toFixed(2)}</span>
+                    <span class="deletebtn">
+                        <button class="deletebtn" onclick="deleteTransaction(this)">x</button>
+                    </span>
+                `;
+
+                list.appendChild(transaction);
+
+                updateBalance(amount);
+                updateIncomeExpense(amount);
+                resetForm();
+            }
+
+            function deleteTransaction(button) {
+                const transaction = button.parentNode.parentNode;
+                const amountString = transaction.querySelector('span:last-child').innerText.slice(1);
+                const amount = parseFloat(amountString);
+
+                list.removeChild(transaction);
+
+                // Reverse the amount sign to remove it from income or expense
+                if (amount < 0) {
+                    updateIncomeExpense(-amount);
+                } else {
+                    updateIncomeExpense(amount, false);
+                }
+
+                updateBalance(-amount);
+            }
+
+            function updateBalance(amount) {
+                const currentBalance = parseFloat(balance.innerText.slice(1));
+                const newBalance = currentBalance + amount;
+                balance.innerText = `$${newBalance.toFixed(2)}`;
+            }
+
+            function updateIncomeExpense(amount, isIncome = true) {
+                const moneyElement = isIncome ? moneyPlus : moneyMinus;
+                const currentAmount = parseFloat(moneyElement.innerText.slice(1));
+                const newAmount = currentAmount + (isIncome ? amount : -amount);
+                moneyElement.innerText = `$${newAmount.toFixed(2)}`;
+            }
+
+            function resetForm() {
+                textInput.value = '';
+                amountInput.value = '';
+            }
+    </script>
+</body>
+</html>
